@@ -3,7 +3,5 @@ flask
 python-dotenv
 google-generativeai
 yt-dlp
-asyncio
-magento-adapter
 requests
 beautifulsoup4
