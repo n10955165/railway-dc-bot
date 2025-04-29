@@ -1,10 +1,9 @@
-discord
+discord.py>=2.3.2
 flask
 python-dotenv
 google-generativeai
-discord-py
 yt-dlp
-asyncio  
+asyncio
 magento-adapter
 requests
 beautifulsoup4
