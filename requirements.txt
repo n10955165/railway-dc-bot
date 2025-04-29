@@ -1,0 +1,10 @@
+discord
+flask
+python-dotenv
+google-generativeai
+discord-py
+yt-dlp
+asyncio  
+magento-adapter
+requests
+beautifulsoup4
