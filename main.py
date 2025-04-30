@@ -153,16 +153,14 @@ async def play(ctx):
 
 anime_history = set()  # 記錄推薦過的動漫
 
-# 生成AI推薦的動漫名稱（繁中＋日文）
+# 生成AI推薦的動漫名稱
 async def generate_anime_title():
     prompt = (
         "あなたは兄が大好きな妹キャラです。\n"
         "以下の條件でアニメを一作品推薦してください：\n"
         "・ジャンルは必ず『戀愛番』か『校園番』。\n"
         "・放送は2010年以降。\n"
-        "・現象級（超大人気作品、例：鬼滅、咒術、SPY×FAMILYなど）は禁止。\n"
-        "・冷門すぎる（マイナーすぎる）作品も禁止。\n"
-        "・形式は必ず『推薦作品名：<繁體中文名>｜<日文名>』のみ。他の説明は禁止。"
+        "・格式：『推薦作品名：<繁體中文名>｜<日文名>』のみ。他の説明は禁止。"
     )
     ai_response = model.generate_content(prompt)
     text = ai_response.text
@@ -175,7 +173,7 @@ async def generate_anime_title():
     else:
         return None, None
 
-# 用Jikan API搜尋動漫資料（以日文名為基礎）
+# 用Jikan API搜尋動漫資料
 async def search_jikan_anime(title_jp):
     url = f"https://api.jikan.moe/v4/anime?q={title_jp}&limit=5"
     res = requests.get(url)
@@ -193,19 +191,18 @@ async def search_jikan_anime(title_jp):
         genres = [genre["name"] for genre in anime.get("genres", [])]
         if (year and year >= 2010) and ("Romance" in genres or "School" in genres):
             return {
-                "title_jp": anime["title_japanese"],
+                "title_jp": anime.get("title_japanese", anime.get("title")),
                 "title_zh": anime.get("title"),
                 "url": anime["url"],
-                "image_url": anime["images"]["jpg"]["large_image_url"],
-                "members": anime.get("members", 0)  # MAL追蹤人數
+                "image_url": anime["images"]["jpg"]["large_image_url"]
             }
     
     return None
 
 # Discord指令
-@bot.slash_command(name="anime", description="推薦一部戀愛／校園系動漫🎬")
+@bot.slash_command(name="anime", description="推薦一部戀愛／校園系動漫")
 async def anime(ctx):
-    await ctx.respond("推薦中，請稍候...")
+    await ctx.respond("搜尋中，請稍候...")
 
     max_retry = 5
 
@@ -224,23 +221,21 @@ async def anime(ctx):
         anime_info = await search_jikan_anime(jp_name)
 
         if anime_info:
-            # 再過濾一次人氣：比如MAL上至少有5000人收藏，但不要超過500,000
-            if 5000 < anime_info["members"] < 4000000:
-                anime_history.add(jp_name)
-                embed = discord.Embed(
-                    title=f"推薦作品名：{zh_name}｜{jp_name}",
-                    url=anime_info["url"],
-                    description="推薦給你的戀愛或校園番！",
-                    color=0x00ccff
-                )
-                embed.set_image(url=anime_info["image_url"])
+            anime_history.add(jp_name)
+            embed = discord.Embed(
+                title=f"推薦作品名：{zh_name}｜{jp_name}",
+                url=anime_info["url"],
+                color=0x00ccff
+            )
+            embed.set_image(url=anime_info["image_url"])
 
-                await ctx.send(embed=embed)
-                return
+            await ctx.send(embed=embed)
+            return
         
         await asyncio.sleep(1)  # 避免請求過快
 
-    await ctx.send("找不到符合條件的作品，請再試一次。")
+    await ctx.send("找不到符合條件的作品。")
+
 
 
 # ====== 天氣查詢指令（改良版） ======
