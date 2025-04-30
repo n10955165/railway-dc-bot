@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 import requests
 import asyncio
 import random
+import aiohttp
 
 
 # ====== Keep Alive（Replit専用） ======
@@ -148,28 +149,9 @@ async def play(ctx):
     except Exception as e:
         await ctx.send(f"💔 お兄ちゃん、ごめんね…：{e}")
 
-# ====== anime推薦功能 ======
-
-import aiohttp
+# ====== anime推薦功能 (用Jikan直接顯示) ======
 
 anime_history = set()
-
-async def search_bahamut_anime(keyword):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-    }
-    search_url = f"https://www.google.com/search?q=site:acg.gamer.com.tw {keyword}"
-    res = requests.get(search_url, headers=headers)
-    html = BeautifulSoup(res.text, "html.parser")
-
-    for tag in html.find_all("h3"):
-        title = tag.text.strip()
-        a_tag = tag.find_previous("a")
-        if a_tag:
-            url = a_tag["href"]
-            if "gamer.com.tw" in url:
-                return title, url
-    return None, None
 
 async def search_jikan_anime(keyword):
     async with aiohttp.ClientSession() as session:
@@ -179,10 +161,8 @@ async def search_jikan_anime(keyword):
                 data = await resp.json()
                 if data.get("data"):
                     anime = data["data"][0]
-                    year = anime.get("year", 0)
-                    members = anime.get("members", 0)
-                    return year, members
-    return None, None
+                    return anime
+    return None
 
 async def generate_anime_title():
     prompt = (
@@ -201,7 +181,7 @@ async def generate_anime_title():
 
 @bot.slash_command(name="anime", description="妹ちゃんがアニメをオススメしてくれるよ🎬")
 async def anime(ctx):
-    await ctx.respond("うふふ…お兄ちゃんにぴったりな隠れた名作を探すねっ…💗")
+    await ctx.respond("うふふ…お兄ちゃんにぴったりな隠れた名作を探してくるねっ💗")
 
     max_retry = 5
 
@@ -214,20 +194,26 @@ async def anime(ctx):
         if anime_title in anime_history:
             continue
 
-        year, members = await search_jikan_anime(anime_title)
+        anime_info = await search_jikan_anime(anime_title)
 
-        # 只有當作品存在且條件符合時才推薦
-        if year and year >= 2010 and members and members < 500000:  # 避免超人氣
-            title, url = await search_bahamut_anime(anime_title)
+        if anime_info:
+            year = anime_info.get("year", 0)
+            members = anime_info.get("members", 0)
 
-            if title and url:
+            if year and year >= 2010 and members and members < 500000:  # 2010後 + 不是超人氣
                 anime_history.add(anime_title)
-                await ctx.send(f"🎬 推薦作品名：**{anime_title}**\n🔗 {url}")
+
+                title = anime_info.get("title")
+                url = anime_info.get("url")
+                synopsis = anime_info.get("synopsis", "（沒有簡介）")
+
+                await ctx.send(f"🎬 推薦作品名：**{title}**\n🔗 {url}\n📝 簡介：{synopsis}")
                 return
 
         await asyncio.sleep(1)
 
     await ctx.send("😭 ごめんね…一生懸命探したけど、ぴったりな作品が見つからなかったよ…💦")
+
 
 
 # ====== 天氣查詢指令（改良版） ======
