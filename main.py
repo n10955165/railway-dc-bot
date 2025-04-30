@@ -149,70 +149,93 @@ async def play(ctx):
     except Exception as e:
         await ctx.send(f"💔 お兄ちゃん、ごめんね…：{e}")
 
-# ====== anime推薦功能 (用Jikan直接顯示) ======
+# ====== anime推薦系統 ======
 
-anime_history = set()
+anime_history = set()  # 記錄推薦過的動漫
 
-async def search_jikan_anime(keyword):
-    async with aiohttp.ClientSession() as session:
-        params = {"q": keyword, "limit": 1}
-        async with session.get("https://api.jikan.moe/v4/anime", params=params) as resp:
-            if resp.status == 200:
-                data = await resp.json()
-                if data.get("data"):
-                    anime = data["data"][0]
-                    return anime
-    return None
-
+# 生成AI推薦的動漫名稱（繁中＋日文）
 async def generate_anime_title():
     prompt = (
         "あなたは兄が大好きな妹キャラです。\n"
-        "今おすすめしたい、まだあまり知られていない隠れた名作アニメを、繁體字で1作品だけ教えてください。\n"
-        "必須條件：2010年以後放送、現象級作品以外（例如鬼滅、進擊、咒術、SpyFamily之類都禁止）\n"
-        "格式：『推薦作品名：<作品名>』。其他說明不要。"
+        "今おすすめしたい、あまり知られていない隠れた名作アニメを紹介してください。\n"
+        "必須條件：2010年以後放送、現象級作品以外（例如鬼滅、進擊、咒術、SpyFamily等禁止）\n"
+        "格式：『推薦作品名：<繁體中文名>｜<日文名>』のみ。他の説明は禁止。英文禁止。\n"
+        "例：推薦作品名：來自新世界｜新世界より"
     )
     ai_response = model.generate_content(prompt)
     text = ai_response.text
-    if "推薦作品名：" in text:
-        anime_title = text.split("推薦作品名：")[1].strip()
-        return anime_title
+
+    if "推薦作品名：" in text and "｜" in text:
+        parts = text.split("推薦作品名：")[1].split("｜")
+        zh_name = parts[0].strip()
+        jp_name = parts[1].strip()
+        return zh_name, jp_name
     else:
+        return None, None
+
+# 用Jikan API搜尋動漫資料（用日文名搜尋）
+async def search_jikan_anime(title_jp):
+    url = f"https://api.jikan.moe/v4/anime?q={title_jp}&limit=5"
+    res = requests.get(url)
+    
+    if res.status_code != 200:
         return None
 
-@bot.slash_command(name="anime", description="妹ちゃんがアニメをオススメしてくれるよ🎬")
-async def anime(ctx):
-    await ctx.respond("うふふ…お兄ちゃんにぴったりな隠れた名作を探してくるねっ💗")
+    data = res.json()
+    if not data.get("data"):
+        return None
 
-    max_retry = 5
+    # 過濾：只要2010年以後的
+    for anime in data["data"]:
+        year = anime.get("year")
+        if year and year >= 2010:
+            return {
+                "title_jp": anime["title_japanese"],
+                "title_zh": anime.get("title"),
+                "url": anime["url"],
+                "image_url": anime["images"]["jpg"]["large_image_url"]
+            }
+    
+    return None
+
+# Discord指令
+@bot.slash_command(name="anime", description="推薦一部隱藏名作動漫🎬")
+async def anime(ctx):
+    await ctx.respond("推薦中，請稍候...")
+
+    max_retry = 3
 
     for _ in range(max_retry):
-        anime_title = await generate_anime_title()
+        result = await generate_anime_title()
 
-        if not anime_title:
+        if not result:
             continue
 
-        if anime_title in anime_history:
+        zh_name, jp_name = result
+
+        # 避免推薦重複
+        if jp_name in anime_history:
             continue
 
-        anime_info = await search_jikan_anime(anime_title)
+        anime_info = await search_jikan_anime(jp_name)
 
         if anime_info:
-            year = anime_info.get("year", 0)
-            members = anime_info.get("members", 0)
+            anime_history.add(jp_name)
+            embed = discord.Embed(
+                title=f"推薦作品名：{zh_name}｜{jp_name}",
+                url=anime_info["url"],
+                description="推薦給你的隱藏名作",
+                color=0x00ccff
+            )
+            embed.set_image(url=anime_info["image_url"])
 
-            if year and year >= 2010 and members and members < 500000:  # 2010後 + 不是超人氣
-                anime_history.add(anime_title)
+            await ctx.send(embed=embed)
+            return
+        
+        await asyncio.sleep(1)  # 避免請求過快
 
-                title = anime_info.get("title")
-                url = anime_info.get("url")
-                synopsis = anime_info.get("synopsis", "（沒有簡介）")
+    await ctx.send("找不到符合條件的作品，請再試一次。")
 
-                await ctx.send(f"🎬 推薦作品名：**{title}**\n🔗 {url}\n📝 簡介：{synopsis}")
-                return
-
-        await asyncio.sleep(1)
-
-    await ctx.send("😭 ごめんね…一生懸命探したけど、ぴったりな作品が見つからなかったよ…💦")
 
 
 
