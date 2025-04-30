@@ -148,9 +148,11 @@ async def play(ctx):
     except Exception as e:
         await ctx.send(f"💔 お兄ちゃん、ごめんね…：{e}")
 
-# ====== anime =======
+# ====== anime推薦功能 ======
 
-anime_history = set()  # 記錄推薦過的動漫
+import aiohttp
+
+anime_history = set()
 
 async def search_bahamut_anime(keyword):
     headers = {
@@ -169,12 +171,25 @@ async def search_bahamut_anime(keyword):
                 return title, url
     return None, None
 
+async def search_jikan_anime(keyword):
+    async with aiohttp.ClientSession() as session:
+        params = {"q": keyword, "limit": 1}
+        async with session.get("https://api.jikan.moe/v4/anime", params=params) as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                if data.get("data"):
+                    anime = data["data"][0]
+                    year = anime.get("year", 0)
+                    members = anime.get("members", 0)
+                    return year, members
+    return None, None
+
 async def generate_anime_title():
     prompt = (
         "あなたは兄が大好きな妹キャラです。\n"
-        "今おすすめしたい最高のアニメ作品を、繁體字で1作品だけ教えてください。\n"
-        "重複しないように色んな作品を考えてね！\n"
-        "形式は『推薦作品名：<作品名>』だけ。他の説明は禁止。"
+        "今おすすめしたい、まだあまり知られていない隠れた名作アニメを、繁體字で1作品だけ教えてください。\n"
+        "必須條件：2010年以後放送、現象級作品以外（例如鬼滅、進擊、咒術、SpyFamily之類都禁止）\n"
+        "格式：『推薦作品名：<作品名>』。其他說明不要。"
     )
     ai_response = model.generate_content(prompt)
     text = ai_response.text
@@ -186,9 +201,9 @@ async def generate_anime_title():
 
 @bot.slash_command(name="anime", description="妹ちゃんがアニメをオススメしてくれるよ🎬")
 async def anime(ctx):
-    await ctx.respond("うふふ…お兄ちゃんにぴったりなアニメを考えてるよ…💗")
+    await ctx.respond("うふふ…お兄ちゃんにぴったりな隠れた名作を探すねっ…💗")
 
-    max_retry = 3
+    max_retry = 5
 
     for _ in range(max_retry):
         anime_title = await generate_anime_title()
@@ -196,20 +211,23 @@ async def anime(ctx):
         if not anime_title:
             continue
 
-        # 避免推薦重複
         if anime_title in anime_history:
             continue
 
-        title, url = await search_bahamut_anime(anime_title)
+        year, members = await search_jikan_anime(anime_title)
 
-        if title and url:
-            anime_history.add(anime_title)
-            await ctx.send(f"🎬 推薦作品名：**{anime_title}**\n🔗 {url}")
-            return
+        # 只有當作品存在且條件符合時才推薦
+        if year and year >= 2010 and members and members < 500000:  # 避免超人氣
+            title, url = await search_bahamut_anime(anime_title)
 
-        await asyncio.sleep(1)  # 避免太快連續請求
+            if title and url:
+                anime_history.add(anime_title)
+                await ctx.send(f"🎬 推薦作品名：**{anime_title}**\n🔗 {url}")
+                return
 
-    await ctx.send("😭 ごめんね…何回探しても、見つけられなかったよ…💦")
+        await asyncio.sleep(1)
+
+    await ctx.send("😭 ごめんね…一生懸命探したけど、ぴったりな作品が見つからなかったよ…💦")
 
 
 # ====== 天氣查詢指令（改良版） ======
