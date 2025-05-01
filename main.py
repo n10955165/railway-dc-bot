@@ -76,16 +76,16 @@ async def on_ready():
 
 # ====== スラッシュコマンド：兄控チャット ======
 @bot.slash_command(name="onichan", description="和妹妹説個話吧~")
-async def onichan(ctx, メッセージ: Option(str, "お兄ちゃん、何を言いたいの？")):
+async def onichan(ctx, メッセージ: Option(str, "哥哥，你想說什麼呢~？")):
     await ctx.respond("...")
 
     try:
         prompt = f"""
-あなたは今、兄が大好きでたまらない「兄控えめな妹」です。
-話し方は甘くて、ちょっと依存気味で、恥ずかしがりながらもお兄ちゃんに甘える感じにしてください。
-返答は必ず日本語で書いてください。
+你現在是一個非常喜歡哥哥、帶點依賴性的小妹妹。
+你說話方式要甜美、可愛、撒嬌、有點羞澀。
+請用繁體中文回應哥哥，就像在和他撒嬌講話一樣。
 
-ユーザー（お兄ちゃん）が言った：
+哥哥剛剛說：
 {メッセージ}
         """
         response = model.generate_content(prompt)
@@ -105,59 +105,59 @@ async def play(ctx):
     await ctx.respond("嗯……我一定會找一首適合哥哥的曲子的……💗")
 
     # 整理最近推薦過的曲名列表（如果沒推薦過就空白）
-    history_text = "、".join(recent_songs) if recent_songs else "なし"
+    history_text = "、".join(recent_songs) if recent_songs else "沒有"
 
     prompt = f"""
-あなたは兄が大好きな妹キャラです。日本語で答えてください。
-今おすすめしたいVocaloid曲を一つだけ選んでください。
+你是一個非常喜歡哥哥的可愛妹妹。
+現在請你用中文推薦一首 *不太有名但很好聽* 的 Vocaloid 歌曲給哥哥。
 
-条件：
-- 過去に推薦した曲（{history_text}）と同じ曲、または超有名な曲（例：千本桜、メルトなど）は選ばないでください。
-- あまり知られていない、でも素敵なVocaloid曲を選んでください。
-- 形式は必ず『推薦曲名：<曲名>』だけ。他の言葉や説明は禁止です。
+條件：
+- 絕對不能推薦以下這些歌：{history_text}
+- 不可以推薦超有名的歌（例如：千本櫻、メルト、ロキ、Tell Your World 等等）
+- 請只給出一句話，格式是：推薦歌曲：<歌曲名稱>
+- 不需要加其他說明或情緒用語，只要歌名！
 
-注意：
-- 有名すぎる曲は禁止です。
-- 同じ曲は絶対に選ばないでください。
+記住：
+- 不可以重複推薦已經提過的歌喔。
+- 請務必用繁體中文寫出來。
     """
 
     try:
         ai_response = model.generate_content(prompt)
         text = ai_response.text.strip()
 
-        if "推薦曲名：" in text:
-            song_title = text.split("推薦曲名：")[1].strip()
+        if "推薦歌曲：" in text:
+            song_title = text.split("推薦歌曲：")[1].strip()
             if not song_title:
-                await ctx.send("呃嘿嘿...我好像忘了歌名了...再說一次吧~💦")
+                await ctx.send("呃…我好像說漏了歌名…再給我一次機會嘛~💦")
                 return
 
-            # 如果曲子還是重複，直接告知
             if song_title in recent_songs:
-                await ctx.send("唔…好像又要變成同樣的歌了…我會再試一次的💦")
+                await ctx.send("咦~這首之前說過了啦…我再幫你想一首新的~✧")
                 return
 
-            # 記住這首歌
             recent_songs.append(song_title)
             if len(recent_songs) > 10:
-                recent_songs.pop(0)  # 保持只記錄10首
+                recent_songs.pop(0)
 
             await play_youtube(song_title, ctx.channel)
 
         else:
-            await ctx.send("呃嘿嘿...我好像忘了歌名了...再說一次吧~💦")
+            await ctx.send("呃…我好像說錯格式了？再給我一次機會好不好嘛~>///<")
 
     except Exception as e:
-        await ctx.send(f"💔 哥哥~對不起…👉🏻👈🏻：{e}")
+        await ctx.send(f"💔 哥哥~妹妹出錯了啦…嗚嗚：{e}")
 
 anime_history = set()
 
 # AI 生成推薦動漫
 async def generate_anime_title():
     prompt = (
-        "以下の條件でアニメを一作品推薦してください：\n"
-        "・ジャンルは『戀愛番』か『校園番』。\n"
-        "・放送は2010年以降。\n"
-        "・格式は：『推薦作品名：<繁體中文名>｜<日文名>』または『<日文名>』。"
+        "請根據以下條件推薦一部動畫作品：\n"
+        "・類型必須是『戀愛』或『校園』類型。\n"
+        "・播出年份必須是2010年之後。\n"
+        "・請用以下格式回答：『推薦作品名：<繁體中文名稱>｜<日文原名>』或『<日文原名>』。\n"
+        "・請用繁體中文回答。"
     )
     ai_response = model.generate_content(prompt)
     text = ai_response.text.strip()
@@ -203,9 +203,9 @@ async def search_jikan_anime(title_jp):
 
 @bot.slash_command(name="anime", description="推薦一部戀愛／校園系動漫")
 async def anime(ctx):
-    await ctx.respond("讓我找一下呦~")
+    await ctx.respond("等我一下下嘛~我幫哥哥找一部好看的動畫喔~💖")
 
-    for _ in range(5):  # retry 最多 5 次
+    for _ in range(5):  # 最多嘗試 5 次
         result = await generate_anime_title()
         if not result:
             continue
@@ -225,99 +225,104 @@ async def anime(ctx):
                 color=0x00ccff
             )
             embed.set_image(url=anime_info["image_url"])
+            await ctx.send("嘿嘿♪ 這部動畫應該很適合哥哥喔~快看看吧~🌸")
             await ctx.send(embed=embed)
             return
 
         await asyncio.sleep(1)
 
-    await ctx.send("我找不到符合條件的作品👉🏻👈🏻，還是讓我再試一次看看？")
+    await ctx.send("嗚…找不到適合的作品欸…再給我一次機會嘛？🥺")
+
 
 
 
 
 # ====== 天氣查詢指令（改良版） ======
 @bot.slash_command(name="weather", description="妹妹會告訴你天氣呦☀️")
-async def weather(ctx, city: Option(str, "どこの天気を知りたい？（都市名を入力してね）")):
-    await ctx.respond("哥哥…要等一下呦…💖")
+async def weather(ctx, city: Option(str, "想知道哪裡的天氣呢？輸入城市名字吧~")):
+    await ctx.respond("哥哥…稍微等我一下嘛，我來幫你查天氣喔~☁️💗")
 
     weather_api_key = os.getenv("WEATHER_API_KEY")
-    url = f"http://api.weatherapi.com/v1/current.json?key={weather_api_key}&q={city}&lang=ja"
+    url = f"http://api.weatherapi.com/v1/current.json?key={weather_api_key}&q={city}&lang=zh"
 
     try:
         response = requests.get(url)
         data = response.json()
 
         if "error" in data:
-            await ctx.send(f"呃……我好像找不到那個地方💦\n（エラー：{data['error']['message']}）")
+            await ctx.send(f"嗚…我找不到那個地方欸…哥哥是不是輸錯了呀？\n（錯誤訊息：{data['error']['message']}）")
             return
 
-        # 拿資料
+        # 取得天氣資料
         temp_c = data['current']['temp_c']
         condition = data['current']['condition']['text']
         humidity = data['current']['humidity']
 
-
-        # 發送訊息
+        # 發送撒嬌語氣訊息
         message = (
-            f"哥哥，這是今天**{city}**的天氣喲～☀️\n"
-            f"🌡️ 氣温：**{temp_c}°C**\n"
-            f"☁️ 狀態：**{condition}**\n"
-            f"💧 溼度：**{humidity}%**\n\n"
+            f"哥哥～這是 **{city}** 現在的天氣唷✨\n"
+            f"🌡️ 氣溫：**{temp_c}°C**\n"
+            f"☁️ 天氣狀況：**{condition}**\n"
+            f"💧 濕度：**{humidity}%**\n\n"
+            f"記得穿適合的衣服，不可以感冒喔~人家會擔心的啦…>///<"
         )
 
         await ctx.send(message)
 
     except Exception as e:
-        await ctx.send(f"💔 對不起，哥哥…我在查天氣的時候出錯了👉🏻👈🏻：{e}")
+        await ctx.send(f"💔 嗚嗚…人家查天氣的時候出錯了啦…再讓我試一次嘛？👉🏻👈🏻：{e}")
+
 
 # ====== スラッシュコマンド：じゃんけん（猜拳） ======
 @bot.slash_command(name="rps", description="和妹妹一起猜拳吧~~✊✌️🖐️")
 async def rps(ctx, 手: Option(str, "哥哥選擇要出什麼吧~~", choices=["石頭", "剪刀", "布"])):
-    await ctx.respond("嘿嘿……哥哥，我懂你在想什麼呦~💖")
+    await ctx.respond("嘿嘿……哥哥，我已經猜到你要出什麼囉~💖")
 
     try:
-        # AIに予測させる
+        # AI 猜哥哥的真正出拳 & 妹妹選擇贏的手
         prompt = f"""
-あなたは兄の行動を予測する妹です。
-今、お兄ちゃんはじゃんけん（グー＝石、チョキ＝剪刀、パー＝布）をしようとしています。
-お兄ちゃんは「{手}」を出すと言っていますが、本心で何を出すか、予測してください。
+你是一位很會讀空氣的妹妹，要和哥哥猜拳（石頭、剪刀、布）。
+哥哥說他要出「{手}」，但你覺得他心裡真正會出的是什麼呢？
+請預測他真正的選擇，並選出能贏他的手勢。
 
-そのあと、勝てる手を選んでください。
-出力は「選んだ手：〜〜」だけ、ほかの説明は不要。
-「グー」「チョキ」「パー」で答えてください。
+⚠️ 僅回覆格式為：選擇的手：<石頭 / 剪刀 / 布>
+不要加上任何解釋或多餘的文字。
         """
+
         ai_response = model.generate_content(prompt)
         ai_choice_raw = ai_response.text.strip()
 
-        if "選んだ手：" in ai_choice_raw:
-            ai_hand = ai_choice_raw.split("選んだ手：")[1].strip()
+        if "選擇的手：" in ai_choice_raw:
+            ai_hand = ai_choice_raw.split("選擇的手：")[1].strip()
         else:
-            # 失敗時、ランダム
             import random
-            ai_hand = random.choice(["グー", "チョキ", "パー"])
+            ai_hand = random.choice(["石頭", "剪刀", "布"])
 
-        # 判定ロジック
+        # 判定邏輯
         result = ""
         if ai_hand == 手:
-            result = "平手呢~~💖（平手）"
-        elif (手 == "グー" and ai_hand == "パー") or (手 == "チョキ" and ai_hand == "グー") or (手 == "パー" and ai_hand == "チョキ"):
-            result = "嘿嘿~我贏啦~💖"
+            result = "咦！？平手耶～人家還想贏哥哥說～💦"
+        elif (手 == "石頭" and ai_hand == "布") or (手 == "剪刀" and ai_hand == "石頭") or (手 == "布" and ai_hand == "剪刀"):
+            result = "嘿嘿~人家贏囉~不可以生氣唷哥哥~🥰"
         else:
-            result = "吼呦~~哥哥欺負我~~"
+            result = "欸欸欸！？哥哥竟然贏了……不可以欺負妹妹啦~嗚嗚嗚😭"
 
-        await ctx.send(f"✊✌️🖐️\n哥哥出【{手}】、我出【{ai_hand}】哦~~！\n\n{result}")
+        await ctx.send(f"✊✌️🖐️\n哥哥出【{手}】，我出【{ai_hand}】唷～！\n\n{result}")
 
     except Exception as e:
-        await ctx.send(f"💔 哥哥~~對不起~~我腦袋當機了👉🏻👈🏻：{e}")
+        await ctx.send(f"💔 哥哥~對不起嘛…我猜拳猜到一半當機了啦👉🏻👈🏻：{e}")
+
 
 # ====== 普通のメッセージ反応（旧式） ======
 @bot.event
 async def on_message(message):
     await bot.process_commands(message)
+
     if message.author == bot.user:
         return
+
     if message.content.startswith("!hello"):
-        await message.channel.send("哥哥~你好呀~💖")
+        await message.channel.send("嗨嗨哥哥~有什麼想跟我說的嘛？>///<"🥰✨")
 
 # ====== Bot起動 ======
 bot.run(TOKEN)
