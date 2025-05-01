@@ -65,17 +65,17 @@ async def play_youtube(query, text_channel):
         await text_channel.send(f"🎵 推薦曲名：**{title}**\n📺 {url}")
 
     except Exception:
-        await text_channel.send(f"⚠️ 曲を探す時に問題があったよ：\n```{traceback.format_exc()}```")
+        await text_channel.send(f"⚠️找不到適合的曲子呢：\n```{traceback.format_exc()}```")
 
 
 
 # ====== イベント ======
 @bot.event
 async def on_ready():
-    print(f"✅ 起動完了！ログイン中: {bot.user}")
+    print(f"✅ 起動完成！！！: {bot.user}")
 
 # ====== スラッシュコマンド：兄控チャット ======
-@bot.slash_command(name="onichan", description="妹ちゃんとお話しよっ")
+@bot.slash_command(name="onichan", description="和妹妹説個話吧~")
 async def onichan(ctx, メッセージ: Option(str, "お兄ちゃん、何を言いたいの？")):
     await ctx.respond("...")
 
@@ -92,17 +92,17 @@ async def onichan(ctx, メッセージ: Option(str, "お兄ちゃん、何を言
         await ctx.send(response.text)
 
     except Exception as e:
-        await ctx.send(f"💔 えええっ…なんかエラー出ちゃった…：{e}")
+        await ctx.send(f"💔 啊，好像出錯了…：{e}")
 
 # ====== スラッシュコマンド：Vocaloid曲再生 ======
 # ====== 歷史記憶（全域變數）======
 recent_songs = []
 
-@bot.slash_command(name="play", description="妹ちゃんがVocaloid曲を選んでくれるよ🎵")
+@bot.slash_command(name="play", description="妹妹會爲你選擇Vocaloid歌曲哦~~🎵")
 async def play(ctx):
     global recent_songs
 
-    await ctx.respond("うふふ…お兄ちゃんにぴったりな曲を探してくるね…💗")
+    await ctx.respond("嗯……我一定會找一首適合哥哥的曲子的……💗")
 
     # 整理最近推薦過的曲名列表（如果沒推薦過就空白）
     history_text = "、".join(recent_songs) if recent_songs else "なし"
@@ -128,12 +128,12 @@ async def play(ctx):
         if "推薦曲名：" in text:
             song_title = text.split("推薦曲名：")[1].strip()
             if not song_title:
-                await ctx.send("えへへ…曲の名前、ちょっと忘れちゃったかも…？もう一度お願い〜💦")
+                await ctx.send("呃嘿嘿...我好像忘了歌名了...再說一次吧~💦")
                 return
 
             # 如果曲子還是重複，直接告知
             if song_title in recent_songs:
-                await ctx.send("うぅ…また同じ曲になっちゃいそう…もう一回試してみるね💦")
+                await ctx.send("唔…好像又要變成同樣的歌了…我會再試一次的💦")
                 return
 
             # 記住這首歌
@@ -144,10 +144,10 @@ async def play(ctx):
             await play_youtube(song_title, ctx.channel)
 
         else:
-            await ctx.send("えへへ…曲の名前、ちょっと忘れちゃったかも…？もう一度お願い〜💦")
+            await ctx.send("呃嘿嘿...我好像忘了歌名了...再說一次吧~💦")
 
     except Exception as e:
-        await ctx.send(f"💔 お兄ちゃん、ごめんね…：{e}")
+        await ctx.send(f"💔 哥哥~對不起…👉🏻👈🏻：{e}")
 
 anime_history = set()
 
@@ -203,7 +203,7 @@ async def search_jikan_anime(title_jp):
 
 @bot.slash_command(name="anime", description="推薦一部戀愛／校園系動漫")
 async def anime(ctx):
-    await ctx.respond("搜尋中，請稍候...")
+    await ctx.respond("讓我找一下呦~")
 
     for _ in range(5):  # retry 最多 5 次
         result = await generate_anime_title()
@@ -230,15 +230,15 @@ async def anime(ctx):
 
         await asyncio.sleep(1)
 
-    await ctx.send("找不到符合條件的作品喔，再試一次看看？")
+    await ctx.send("我找不到符合條件的作品👉🏻👈🏻，還是讓我再試一次看看？")
 
 
 
 
 # ====== 天氣查詢指令（改良版） ======
-@bot.slash_command(name="weather", description="妹ちゃんがお天気教えてあげるっ☀️")
+@bot.slash_command(name="weather", description="妹妹會告訴你天氣呦☀️")
 async def weather(ctx, city: Option(str, "どこの天気を知りたい？（都市名を入力してね）")):
-    await ctx.respond("ちょっと待っててね…お兄ちゃん…💖")
+    await ctx.respond("哥哥…要等一下呦…💖")
 
     weather_api_key = os.getenv("WEATHER_API_KEY")
     url = f"http://api.weatherapi.com/v1/current.json?key={weather_api_key}&q={city}&lang=ja"
@@ -248,7 +248,7 @@ async def weather(ctx, city: Option(str, "どこの天気を知りたい？（�
         data = response.json()
 
         if "error" in data:
-            await ctx.send(f"ううぅ…その場所、見つからなかったみたい💦\n（エラー：{data['error']['message']}）")
+            await ctx.send(f"呃……我好像找不到那個地方💦\n（エラー：{data['error']['message']}）")
             return
 
         # 拿資料
@@ -259,21 +259,21 @@ async def weather(ctx, city: Option(str, "どこの天気を知りたい？（�
 
         # 發送訊息
         message = (
-            f"お兄ちゃん、今の **{city}** のお天気だよ〜☀️\n"
-            f"🌡️ 気温：**{temp_c}°C**\n"
-            f"☁️ 状態：**{condition}**\n"
-            f"💧 湿度：**{humidity}%**\n\n"
+            f"哥哥，這是今天**{city}**的天氣喲～☀️\n"
+            f"🌡️ 氣温：**{temp_c}°C**\n"
+            f"☁️ 狀態：**{condition}**\n"
+            f"💧 溼度：**{humidity}%**\n\n"
         )
 
         await ctx.send(message)
 
     except Exception as e:
-        await ctx.send(f"💔 ごめんね、お兄ちゃん…天気調べてる時にエラーが出ちゃった：{e}")
+        await ctx.send(f"💔 對不起，哥哥…我在查天氣的時候出錯了👉🏻👈🏻：{e}")
 
 # ====== スラッシュコマンド：じゃんけん（猜拳） ======
-@bot.slash_command(name="rps", description="妹ちゃんとじゃんけんしよっ✊✌️🖐️")
-async def rps(ctx, 手: Option(str, "お兄ちゃんの手を選んでね", choices=["グー", "チョキ", "パー"])):
-    await ctx.respond("うふふ…お兄ちゃんの考え、読んじゃうからね〜💖")
+@bot.slash_command(name="rps", description="和妹妹一起猜拳吧~~✊✌️🖐️")
+async def rps(ctx, 手: Option(str, "哥哥選擇要出什麼吧~~", choices=["石頭", "剪刀", "布"])):
+    await ctx.respond("嘿嘿……哥哥，我懂你在想什麼呦~💖")
 
     try:
         # AIに予測させる
@@ -299,16 +299,16 @@ async def rps(ctx, 手: Option(str, "お兄ちゃんの手を選んでね", choi
         # 判定ロジック
         result = ""
         if ai_hand == 手:
-            result = "あいこだねっ💖（平手）"
+            result = "平手呢~~💖（平手）"
         elif (手 == "グー" and ai_hand == "パー") or (手 == "チョキ" and ai_hand == "グー") or (手 == "パー" and ai_hand == "チョキ"):
-            result = "お兄ちゃん、負けちゃったねっ💖"
+            result = "嘿嘿~我贏啦~💖"
         else:
-            result = "お兄ちゃん、勝ったねっ✨"
+            result = "吼呦~~哥哥欺負我~~"
 
-        await ctx.send(f"✊✌️🖐️\nお兄ちゃんは【{手}】、妹ちゃんは【{ai_hand}】を出したよ！\n\n{result}")
+        await ctx.send(f"✊✌️🖐️\n哥哥出【{手}】、我出【{ai_hand}】哦~~！\n\n{result}")
 
     except Exception as e:
-        await ctx.send(f"💔 ごめんね…考えてる途中でエラー出ちゃった…：{e}")
+        await ctx.send(f"💔 哥哥~~對不起~~我腦袋當機了👉🏻👈🏻：{e}")
 
 # ====== 普通のメッセージ反応（旧式） ======
 @bot.event
@@ -317,7 +317,7 @@ async def on_message(message):
     if message.author == bot.user:
         return
     if message.content.startswith("!hello"):
-        await message.channel.send("やっほ〜お兄ちゃんっ💖")
+        await message.channel.send("哥哥~你好呀~💖")
 
 # ====== Bot起動 ======
 bot.run(TOKEN)
