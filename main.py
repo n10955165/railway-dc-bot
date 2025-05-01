@@ -322,7 +322,7 @@ async def on_message(message):
         return
 
     if message.content.startswith("!hello"):
-        await message.channel.send("嗨嗨哥哥~有什麼想跟我說的嘛？>///<"🥰✨")
+        await message.channel.send("嗨嗨哥哥~有什麼想跟我說的嘛？>///<🥰✨")
 
 # ====== Bot起動 ======
 bot.run(TOKEN)
