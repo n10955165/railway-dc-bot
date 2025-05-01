@@ -75,8 +75,8 @@ async def on_ready():
     print(f"✅ 起動完成！！！: {bot.user}")
 
 # ====== スラッシュコマンド：兄控チャット ======
-@bot.slash_command(name="onichan", description="和妹妹説個話吧~")
-async def onichan(ctx, メッセージ: Option(str, "哥哥，你想說什麼呢~？")):
+@bot.slash_command(name="onichan", description="和最可愛的妹妹説個話吧~")
+async def onichan(ctx, メッセージ: Option(str, "你想說什麼呢~？")):
     await ctx.respond("...")
 
     try:
@@ -98,7 +98,7 @@ async def onichan(ctx, メッセージ: Option(str, "哥哥，你想說什麼呢
 # ====== 歷史記憶（全域變數）======
 recent_songs = []
 
-@bot.slash_command(name="play", description="妹妹會爲你選擇Vocaloid歌曲哦~~🎵")
+@bot.slash_command(name="play", description="我會爲你選擇Vocaloid歌曲哦~~🎵")
 async def play(ctx):
     global recent_songs
 
@@ -146,7 +146,7 @@ async def play(ctx):
             await ctx.send("呃…我好像說錯格式了？再給我一次機會好不好嘛~>///<")
 
     except Exception as e:
-        await ctx.send(f"💔 哥哥~出錯了啦…嗚嗚：{e}")
+        await ctx.send(f"出錯了啦…嗚嗚🥺：{e}")
 
 anime_history = set()
 
@@ -203,7 +203,7 @@ async def search_jikan_anime(title_jp):
 
 @bot.slash_command(name="anime", description="推薦一部戀愛／校園系動漫")
 async def anime(ctx):
-    await ctx.respond("等我一下下嘛~我幫哥哥找一部好看的動畫喔~💖")
+    await ctx.respond("等我一下下嘛~我找一部好看的動畫一起看喔~")
 
     for _ in range(5):  # 最多嘗試 5 次
         result = await generate_anime_title()
@@ -225,7 +225,7 @@ async def anime(ctx):
                 color=0x00ccff
             )
             embed.set_image(url=anime_info["image_url"])
-            await ctx.send("嘿嘿♪ 這部動畫應該很適合哥哥喔~快看看吧~🌸")
+            await ctx.send("嘿嘿♪ 這部動畫應該很適合你喔~快看看吧~🌸")
             await ctx.send(embed=embed)
             return
 
@@ -238,9 +238,9 @@ async def anime(ctx):
 
 
 # ====== 天氣查詢指令（改良版） ======
-@bot.slash_command(name="weather", description="妹妹會告訴你天氣呦☀️")
+@bot.slash_command(name="weather", description="最可愛的妹妹會告訴你天氣呦☀️")
 async def weather(ctx, city: Option(str, "想知道哪裡的天氣呢？輸入城市名字吧~")):
-    await ctx.respond("哥哥…稍微等我一下嘛，我來幫你查天氣喔~☁️💗")
+    await ctx.respond("稍微等我一下嘛，我來幫你查天氣喔~☁️💗")
 
     weather_api_key = os.getenv("WEATHER_API_KEY")
     url = f"http://api.weatherapi.com/v1/current.json?key={weather_api_key}&q={city}&lang=zh"
@@ -250,7 +250,7 @@ async def weather(ctx, city: Option(str, "想知道哪裡的天氣呢？輸入�
         data = response.json()
 
         if "error" in data:
-            await ctx.send(f"嗚…我找不到那個地方欸…哥哥是不是輸錯了呀？\n（錯誤訊息：{data['error']['message']}）")
+            await ctx.send(f"嗚…我找不到那個地方欸…是不是打錯了呢？\n（錯誤訊息{data['error']['message']}）")
             return
 
         # 取得天氣資料
@@ -275,8 +275,8 @@ async def weather(ctx, city: Option(str, "想知道哪裡的天氣呢？輸入�
 
 # ====== スラッシュコマンド：じゃんけん（猜拳） ======
 @bot.slash_command(name="rps", description="和妹妹一起猜拳吧~~✊✌️🖐️")
-async def rps(ctx, 手: Option(str, "哥哥選擇要出什麼吧~~", choices=["石頭", "剪刀", "布"])):
-    await ctx.respond("嘿嘿……哥哥，我已經猜到你要出什麼囉~💖")
+async def rps(ctx, 手: Option(str, "選擇要出什麼吧~~", choices=["石頭", "剪刀", "布"])):
+    await ctx.respond("嘿嘿……，我已經猜到你要出什麼囉~💖")
 
     try:
         # AI 猜哥哥的真正出拳 & 妹妹選擇贏的手
@@ -303,14 +303,14 @@ async def rps(ctx, 手: Option(str, "哥哥選擇要出什麼吧~~", choices=["�
         if ai_hand == 手:
             result = "咦！？平手耶～人家還想贏哥哥說～💦"
         elif (手 == "石頭" and ai_hand == "布") or (手 == "剪刀" and ai_hand == "石頭") or (手 == "布" and ai_hand == "剪刀"):
-            result = "嘿嘿~人家贏囉~不可以生氣唷哥哥~🥰"
+            result = "嘿嘿~人家贏囉~不可以生氣唷~🥰"
         else:
-            result = "欸欸欸！？哥哥竟然贏了……不可以欺負妹妹啦~嗚嗚嗚😭"
+            result = "欸欸欸！？你竟然贏了……不要欺負我啦~嗚嗚嗚😭"
 
         await ctx.send(f"✊✌️🖐️\n哥哥出【{手}】，我出【{ai_hand}】唷～！\n\n{result}")
 
     except Exception as e:
-        await ctx.send(f"💔 哥哥~對不起嘛…我猜拳猜到一半當機了啦👉🏻👈🏻：{e}")
+        await ctx.send(f"💔 對不起嘛…我猜拳猜到一半當機了啦👉🏻👈🏻：{e}")
 
 
 # ====== 普通のメッセージ反応（旧式） ======
