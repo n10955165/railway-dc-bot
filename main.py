@@ -149,35 +149,36 @@ async def play(ctx):
     except Exception as e:
         await ctx.send(f"💔 お兄ちゃん、ごめんね…：{e}")
 
-# ====== anime推薦系統 ======
+anime_history = set()
 
-anime_history = set()  # 記錄推薦過的動漫
-
-# 生成AI推薦的動漫名稱
+# AI 生成推薦動漫
 async def generate_anime_title():
     prompt = (
-        "あなたは兄が大好きな妹キャラです。\n"
         "以下の條件でアニメを一作品推薦してください：\n"
-        "・ジャンルは必ず『戀愛番』か『校園番』。\n"
+        "・ジャンルは『戀愛番』か『校園番』。\n"
         "・放送は2010年以降。\n"
-        "・格式：『推薦作品名：<繁體中文名>｜<日文名>』のみ。他の説明は禁止。"
+        "・格式は：『推薦作品名：<繁體中文名>｜<日文名>』または『<日文名>』。"
     )
     ai_response = model.generate_content(prompt)
-    text = ai_response.text
+    text = ai_response.text.strip()
 
+    # 最寬鬆處理方式
     if "推薦作品名：" in text and "｜" in text:
         parts = text.split("推薦作品名：")[1].split("｜")
         zh_name = parts[0].strip()
         jp_name = parts[1].strip()
         return zh_name, jp_name
+    elif "｜" in text:
+        zh_name, jp_name = text.split("｜")
+        return zh_name.strip(), jp_name.strip()
     else:
-        return None, None
+        return None, text  # 把整段當作日文名 fallback 使用
 
-# 用Jikan API搜尋動漫資料
+# Jikan API 搜尋
 async def search_jikan_anime(title_jp):
-    url = f"https://api.jikan.moe/v4/anime?q={title_jp}&limit=5"
+    url = f"https://api.jikan.moe/v4/anime?q={title_jp}&limit=10&sfw=true"
     res = requests.get(url)
-    
+
     if res.status_code != 200:
         return None
 
@@ -185,36 +186,32 @@ async def search_jikan_anime(title_jp):
     if not data.get("data"):
         return None
 
-    # 過濾：只要2010年以後的，且是戀愛或校園番
     for anime in data["data"]:
-        year = anime.get("year")
-        genres = [genre["name"] for genre in anime.get("genres", [])]
-        if (year and year >= 2010) and ("Romance" in genres or "School" in genres):
+        year = anime.get("year", 0)
+        genres = [g["name"] for g in anime.get("genres", [])]
+
+        # 寬鬆條件：2010以後 + 含任一關鍵 genre
+        if year >= 2010 and ("Romance" in genres or "School" in genres):
             return {
                 "title_jp": anime.get("title_japanese", anime.get("title")),
                 "title_zh": anime.get("title"),
                 "url": anime["url"],
                 "image_url": anime["images"]["jpg"]["large_image_url"]
             }
-    
+
     return None
 
-# Discord指令
 @bot.slash_command(name="anime", description="推薦一部戀愛／校園系動漫")
 async def anime(ctx):
     await ctx.respond("搜尋中，請稍候...")
 
-    max_retry = 5
-
-    for _ in range(max_retry):
+    for _ in range(5):  # retry 最多 5 次
         result = await generate_anime_title()
-
         if not result:
             continue
 
         zh_name, jp_name = result
 
-        # 避免推薦重複
         if jp_name in anime_history:
             continue
 
@@ -223,18 +220,18 @@ async def anime(ctx):
         if anime_info:
             anime_history.add(jp_name)
             embed = discord.Embed(
-                title=f"推薦作品名：{zh_name}｜{jp_name}",
+                title=f"推薦作品名：{anime_info['title_zh']}｜{anime_info['title_jp']}",
                 url=anime_info["url"],
                 color=0x00ccff
             )
             embed.set_image(url=anime_info["image_url"])
-
             await ctx.send(embed=embed)
             return
-        
-        await asyncio.sleep(1)  # 避免請求過快
 
-    await ctx.send("找不到符合條件的作品。")
+        await asyncio.sleep(1)
+
+    await ctx.send("找不到符合條件的作品喔，再試一次看看？")
+
 
 
 
