@@ -102,7 +102,7 @@ recent_songs = []
 async def play(ctx):
     global recent_songs
 
-    await ctx.respond("嗯……我一定會找一首適合哥哥的曲子的……💗")
+    await ctx.respond("嗯……等一下🥺")
 
     # 整理最近推薦過的曲名列表（如果沒推薦過就空白）
     history_text = "、".join(recent_songs) if recent_songs else "沒有"
@@ -146,7 +146,7 @@ async def play(ctx):
             await ctx.send("呃…我好像說錯格式了？再給我一次機會好不好嘛~>///<")
 
     except Exception as e:
-        await ctx.send(f"💔 哥哥~妹妹出錯了啦…嗚嗚：{e}")
+        await ctx.send(f"💔 哥哥~出錯了啦…嗚嗚：{e}")
 
 anime_history = set()
 
