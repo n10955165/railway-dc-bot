@@ -125,8 +125,9 @@ async def play(ctx):
         ai_response = model.generate_content(prompt)
         text = ai_response.text.strip()
 
-        if "推薦歌曲：" in text:
-            song_title = text.split("推薦歌曲：")[1].strip()
+        if "推薦曲名：" in text:
+            song_title = text.split("推薦曲名：")[1].strip()
+
             if not song_title:
                 await ctx.send("呃…我好像說漏了歌名…再給我一次機會嘛~💦")
                 return
