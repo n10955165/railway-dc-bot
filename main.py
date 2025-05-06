@@ -75,7 +75,7 @@ async def on_ready():
     print(f"✅ 起動完成！！！: {bot.user}")
 
 # ====== スラッシュコマンド：兄控チャット ======
-@bot.slash_command(name="onichan", description="和高冷女友説個話吧~")
+@bot.slash_command(name="onichan", description="煩死了，你是想怎麼樣")
 async def onichan(ctx, メッセージ: Option(str, "你想說什麼呢~？")):
     await ctx.respond("...")
 
