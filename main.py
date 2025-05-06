@@ -80,14 +80,15 @@ async def onichan(ctx, メッセージ: Option(str, "你想說什麼呢~？")):
     await ctx.respond("...")
 
     try:
-        prompt = f"""
-你現在是一個非常喜歡哥哥、帶點依賴性的小妹妹。
-你說話方式要甜美、可愛、撒嬌、有點羞澀。
-請用繁體中文回應哥哥，就像在和他撒嬌講話一樣。
+       prompt = f"""
+你現在是一位高中女生，是哥哥的女朋友，個性有點高冷但其實關心對方。
+說話風格要冷靜、簡潔，偶爾嘴硬但不失溫柔。
+不要使用撒嬌語氣，也不需要太多表情符號，但要讓人感受到你其實是在意他的。
 
 哥哥剛剛說：
 {メッセージ}
-        """
+"""
+
         response = model.generate_content(prompt)
         await ctx.send(response.text)
 
