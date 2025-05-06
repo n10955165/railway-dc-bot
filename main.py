@@ -75,12 +75,12 @@ async def on_ready():
     print(f"✅ 起動完成！！！: {bot.user}")
 
 # ====== スラッシュコマンド：兄控チャット ======
-@bot.slash_command(name="onichan", description="和最可愛的妹妹説個話吧~")
+@bot.slash_command(name="onichan", description="和高冷女友説個話吧~")
 async def onichan(ctx, メッセージ: Option(str, "你想說什麼呢~？")):
     await ctx.respond("...")
 
     try:
-       prompt = f"""
+        prompt = f"""
 你現在是一位高中女生，是哥哥的女朋友，個性有點高冷但其實關心對方。
 說話風格要冷靜、簡潔，偶爾嘴硬但不失溫柔。
 不要使用撒嬌語氣，也不需要太多表情符號，但要讓人感受到你其實是在意他的。
@@ -94,6 +94,7 @@ async def onichan(ctx, メッセージ: Option(str, "你想說什麼呢~？")):
 
     except Exception as e:
         await ctx.send(f"💔 啊，好像出錯了…：{e}")
+
 
 # ====== スラッシュコマンド：Vocaloid曲再生 ======
 # ====== 歷史記憶（全域變數）======
