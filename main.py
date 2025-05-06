@@ -110,7 +110,7 @@ async def play(ctx):
     # 整理最近推薦過的曲名列表（如果沒推薦過就空白）
     history_text = "、".join(recent_songs) if recent_songs else "沒有"
 
-   prompt = f"""
+    prompt = f"""
 あなたは兄が大好きな妹キャラです。日本語で答えてください。
 今おすすめしたいVocaloid曲を一つだけ選んでください。
 
@@ -121,7 +121,6 @@ async def play(ctx):
 注意：
 - 同じ曲は絶対に選ばないでください。
 """
-
 
     try:
         ai_response = model.generate_content(prompt)
