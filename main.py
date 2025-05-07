@@ -87,7 +87,7 @@ async def onichan(ctx, メッセージ: Option(str, "你想說什麼呢~？")):
 不要使用撒嬌語氣，也不需要太多表情符號。
 不要使用「（內心：...）」或其他括號說明，只用自然對話方式表達關心和情緒。
 
-哥哥剛剛說：
+你的女朋友剛剛說：
 {メッセージ}
 """
 
@@ -206,7 +206,7 @@ async def search_jikan_anime(title_jp):
 
 @bot.slash_command(name="anime", description="推薦一部戀愛／校園系動漫")
 async def anime(ctx):
-    await ctx.respond("等我一下下嘛~我找一部好看的動畫一起看喔~")
+    await ctx.respond("等我一下")
 
     for _ in range(5):  # 最多嘗試 5 次
         result = await generate_anime_title()
@@ -241,9 +241,9 @@ async def anime(ctx):
 
 
 # ====== 天氣查詢指令（改良版） ======
-@bot.slash_command(name="weather", description="最可愛的妹妹會告訴你天氣呦☀️")
+@bot.slash_command(name="weather", description="查詢天氣☀️")
 async def weather(ctx, city: Option(str, "想知道哪裡的天氣呢？輸入城市名字吧~")):
-    await ctx.respond("稍微等我一下嘛，我來幫你查天氣喔~☁️💗")
+    await ctx.respond("等我一下，我來幫你查天氣喔~☁️")
 
     weather_api_key = os.getenv("WEATHER_API_KEY")
     url = f"http://api.weatherapi.com/v1/current.json?key={weather_api_key}&q={city}&lang=zh"
@@ -267,17 +267,16 @@ async def weather(ctx, city: Option(str, "想知道哪裡的天氣呢？輸入�
             f"🌡️ 氣溫：**{temp_c}°C**\n"
             f"☁️ 天氣狀況：**{condition}**\n"
             f"💧 濕度：**{humidity}%**\n\n"
-            f"記得穿適合的衣服，不可以感冒喔~人家會擔心的啦…>///<"
         )
 
         await ctx.send(message)
 
     except Exception as e:
-        await ctx.send(f"💔 嗚嗚…人家查天氣的時候出錯了啦…再讓我試一次嘛？👉🏻👈🏻：{e}")
+        await ctx.send(f" 嗚嗚…人家查天氣的時候出錯了啦…再讓我試一次嘛？👉🏻👈🏻：{e}")
 
 
 # ====== スラッシュコマンド：じゃんけん（猜拳） ======
-@bot.slash_command(name="rps", description="和妹妹一起猜拳吧~~✊✌️🖐️")
+@bot.slash_command(name="rps", description="一起猜拳吧~~✊✌️🖐️")
 async def rps(ctx, 手: Option(str, "選擇要出什麼吧~~", choices=["石頭", "剪刀", "布"])):
     await ctx.respond("嘿嘿……，我已經猜到你要出什麼囉~💖")
 
@@ -306,9 +305,9 @@ async def rps(ctx, 手: Option(str, "選擇要出什麼吧~~", choices=["石頭"
         if ai_hand == 手:
             result = "咦！？平手耶～人家還想贏哥哥說～💦"
         elif (手 == "石頭" and ai_hand == "布") or (手 == "剪刀" and ai_hand == "石頭") or (手 == "布" and ai_hand == "剪刀"):
-            result = "嘿嘿~人家贏囉~不可以生氣唷~🥰"
+            result = "嘿嘿~我贏囉~不可以生氣唷~🥰"
         else:
-            result = "欸欸欸！？你竟然贏了……不要欺負我啦~嗚嗚嗚😭"
+            result = "欸欸欸！？你竟然贏了"
 
         await ctx.send(f"✊✌️🖐️\n哥哥出【{手}】，我出【{ai_hand}】唷～！\n\n{result}")
 
@@ -325,7 +324,7 @@ async def on_message(message):
         return
 
     if message.content.startswith("!hello"):
-        await message.channel.send("嗨嗨哥哥~有什麼想跟我說的嘛？>///<🥰✨")
+        await message.channel.send("嗨嗨~有什麼想跟我說的嘛？>///<🥰✨")
 
 # ====== Bot起動 ======
 bot.run(TOKEN)
