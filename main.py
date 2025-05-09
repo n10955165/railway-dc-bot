@@ -151,7 +151,7 @@ async def play(ctx):
             await ctx.send("呃…我好像說錯格式了？再給我一次機會好不好嘛~>///<")
 
     except Exception as e:
-        await ctx.send(f"出錯了啦…嗚嗚🥺：{e}")
+        await ctx.send(f"出錯了啦…嗚嗚Q_Q：{e}")
 
 anime_history = set()
 
@@ -169,7 +169,7 @@ async def generate_anime_title():
 
     # 最寬鬆處理方式
     if "推薦作品名：" in text and "｜" in text:
-        parts = text.split("推薦作品名：")[1].split("｜")
+        parts = text.split("推薦給你這首( >v<)_!")[1].split("｜")
         zh_name = parts[0].strip()
         jp_name = parts[1].strip()
         return zh_name, jp_name
@@ -208,7 +208,7 @@ async def search_jikan_anime(title_jp):
 
 @bot.slash_command(name="anime", description="推薦一部戀愛／校園系動漫")
 async def anime(ctx):
-    await ctx.respond("等我一下")
+    await ctx.respond("等我一下喔~˙v˙")
 
     for _ in range(5):  # 最多嘗試 5 次
         result = await generate_anime_title()
@@ -230,7 +230,7 @@ async def anime(ctx):
                 color=0x00ccff
             )
             embed.set_image(url=anime_info["image_url"])
-            await ctx.send("嘿嘿♪ 這部動畫應該很適合你喔~快看看吧~🌸")
+            await ctx.send("嘿嘿♪ 我覺得這部動畫應該很適合哥哥喔!快看看吧~🌸")
             await ctx.send(embed=embed)
             return
 
@@ -244,7 +244,7 @@ async def anime(ctx):
 
 # ====== 天氣查詢指令（改良版） ======
 @bot.slash_command(name="weather", description="查詢天氣☀️")
-async def weather(ctx, city: Option(str, "想知道哪裡的天氣呢？輸入城市名字吧~")):
+async def weather(ctx, city: Option(str, "想知道哪裡的天氣呢？告訴我城市名字吧~")):
     await ctx.respond("等我一下，我來幫你查天氣喔~☁️")
 
     weather_api_key = os.getenv("WEATHER_API_KEY")
@@ -255,7 +255,7 @@ async def weather(ctx, city: Option(str, "想知道哪裡的天氣呢？輸入�
         data = response.json()
 
         if "error" in data:
-            await ctx.send(f"嗚…我找不到那個地方欸…是不是打錯了呢？\n（錯誤訊息{data['error']['message']}）")
+            await ctx.send(f"嗚…找不到那個地方欸…Q_Q\n哥哥幫我看一下嘛~是不是打錯了呢？\n（錯誤訊息{data['error']['message']}）")
             return
 
         # 取得天氣資料
@@ -309,7 +309,7 @@ async def rps(ctx, 手: Option(str, "選擇要出什麼吧~~", choices=["石頭"
         elif (手 == "石頭" and ai_hand == "布") or (手 == "剪刀" and ai_hand == "石頭") or (手 == "布" and ai_hand == "剪刀"):
             result = "嘿嘿~我贏囉~不可以生氣唷~🥰"
         else:
-            result = "欸欸欸！？你竟然贏了"
+            result = "欸欸欸！？竟然是哥哥你贏了嗎！？唉呦...ˊ口ˋ"
 
         await ctx.send(f"✊✌️🖐️\n哥哥出【{手}】，我出【{ai_hand}】唷～！\n\n{result}")
 
