@@ -103,7 +103,7 @@ async def onichan(ctx, メッセージ: Option(str, "你想說什麼呢~？")):
 # ====== 歷史記憶（全域變數）======
 recent_songs = []
 
-@bot.slash_command(name="play", description="我會爲你選擇Vocaloid歌曲哦~~🎵")
+@bot.slash_command(name="play", description="我來幫你選擇Vocaloid歌曲吧~~🎵")
 async def play(ctx):
     global recent_songs
 
@@ -131,7 +131,7 @@ async def play(ctx):
         text = ai_response.text.strip()
 
         if "推薦曲名：" in text:
-            song_title = text.split("推薦曲名：")[1].strip()
+            song_title = text.split("推薦給你這首!( >v<)_ ")[1].strip()
 
             if not song_title:
                 await ctx.send("呃…我好像說漏了歌名…再給我一次機會嘛~💦")
@@ -169,7 +169,7 @@ async def generate_anime_title():
 
     # 最寬鬆處理方式
     if "推薦作品名：" in text and "｜" in text:
-        parts = text.split("推薦給你這首( >v<)_!")[1].split("｜")
+        parts = text.split("推薦給你這部( >v<)_! ")[1].split("｜")
         zh_name = parts[0].strip()
         jp_name = parts[1].strip()
         return zh_name, jp_name
@@ -307,14 +307,14 @@ async def rps(ctx, 手: Option(str, "選擇要出什麼吧~~", choices=["石頭"
         if ai_hand == 手:
             result = "咦！？平手耶～人家還想贏哥哥說～💦"
         elif (手 == "石頭" and ai_hand == "布") or (手 == "剪刀" and ai_hand == "石頭") or (手 == "布" and ai_hand == "剪刀"):
-            result = "嘿嘿~我贏囉~不可以生氣唷~🥰"
+            result = "嘿嘿~我贏啦~哥哥不可以生氣唷~🥰"
         else:
             result = "欸欸欸！？竟然是哥哥你贏了嗎！？唉呦...ˊ口ˋ"
 
         await ctx.send(f"✊✌️🖐️\n哥哥出【{手}】，我出【{ai_hand}】唷～！\n\n{result}")
 
     except Exception as e:
-        await ctx.send(f"💔 對不起嘛…我猜拳猜到一半當機了啦👉🏻👈🏻：{e}")
+        await ctx.send(f"💔 對不起嘛…我猜拳猜到一半當機了，忘記要出什麼了啦._.👉🏻👈🏻：{e}")
 
 
 # ====== 普通のメッセージ反応（旧式） ======
