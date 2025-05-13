@@ -131,10 +131,11 @@ async def play(ctx):
         text = ai_response.text.strip()
 
         if "推薦曲名：" in text:
-            song_title = text.split("如果是你的話...應該會喜歡這首吧 ")[1].strip()
-
-            if not song_title:
-                await ctx.send("糟糕…我好像說漏了歌名…再讓我試一次吧!")
+            parts = text.split("推薦曲名：")
+            if len(parts) > 1:
+                song_title = parts[1].strip()
+            else:
+                await ctx.send("咦...歌名好像不見了？我再想一首吧～")
                 return
 
             if song_title in recent_songs:
